@@ -1,0 +1,40 @@
+/* MOBILE APPS */
+.mobile-apps { background: var(--bg-primary); }
+.app-showcase { display: flex; flex-direction: column; gap: 80px; }
+.app-feature {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+}
+.app-feature:nth-child(even) .app-mockup-wrap { order: 2; }
+.app-feature:nth-child(even) .app-info { order: 1; }
+.app-mockup-wrap { display: flex; justify-content: center; position: relative; }
+.app-mockup {
+  width: 240px; aspect-ratio: 9/19.5; border-radius: 40px;
+  background: var(--bg-card); border: 3px solid var(--border);
+  position: relative; overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.5), var(--glow-primary);
+  transition: var(--transition-bounce);
+}
+.app-mockup:hover { transform: translateY(-10px) rotate(-1deg); }
+.app-mockup-screen {
+  position: absolute; inset: 8px; border-radius: 34px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 5rem; flex-direction: column; gap: 8px;
+}
+.app-mockup-screen p { font-size: 0.9rem; font-weight: 700; color: #fff; }
+.app-info-tag {
+  display: inline-block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--secondary); margin-bottom: 12px;
+}
+.app-info h3 { font-size: 2rem; font-weight: 800; margin-bottom: 16px; color: var(--text-primary); }
+.app-info p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 24px; }
+.app-features-list { list-style: none; margin-bottom: 24px; display: flex; flex-direction: column; gap: 10px; }
+.app-features-list li { display: flex; align-items: center; gap: 10px; color: var(--text-secondary); font-size: 0.95rem; }
+.app-features-list li::before { content: '✦'; color: var(--primary-light); font-size: 0.7rem; }
+.app-download-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+
+@media (max-width: 860px) {
+  .app-feature { grid-template-columns: 1fr; }
+  .app-feature:nth-child(even) .app-mockup-wrap,
+  .app-feature:nth-child(even) .app-info { order: unset; }
+  .app-mockup { width: 200px; }
+}

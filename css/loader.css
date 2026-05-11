@@ -1,0 +1,38 @@
+/* LOADER */
+.loader {
+  position: fixed; inset: 0; background: var(--loader-bg); z-index: 99999;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+.loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.loader-inner { text-align: center; }
+.loader-logo { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 32px; color: var(--text-primary); }
+.loader-logo .loader-bracket { color: var(--primary-light); }
+.loader-logo .loader-name { background: var(--grad-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.loader-bar { width: 200px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin: 0 auto 16px; }
+.loader-progress { height: 100%; background: var(--grad-primary); border-radius: 2px; width: 0%; transition: width 0.08s ease; }
+.loader-text { font-size: 0.8rem; color: var(--text-muted); letter-spacing: 0.05em; }
+
+/* CURSOR */
+.cursor {
+  position: fixed; top: 0; left: 0; width: 10px; height: 10px; background: var(--primary-light);
+  border-radius: 50%; pointer-events: none; z-index: 99998;
+  transform: translate(-50%, -50%); transition: width 0.2s, height 0.2s; mix-blend-mode: screen;
+}
+.cursor-follower {
+  position: fixed; top: 0; left: 0; width: 32px; height: 32px;
+  border: 1.5px solid var(--primary); border-radius: 50%; pointer-events: none; z-index: 99997;
+  transform: translate(-50%, -50%); transition: transform 0.12s ease, width 0.2s, height 0.2s, opacity 0.2s;
+}
+.cursor.hovered { width: 20px; height: 20px; background: var(--secondary); }
+.cursor-follower.hovered { width: 50px; height: 50px; border-color: var(--secondary); opacity: 0.5; }
+
+/* BACK TO TOP */
+.back-to-top {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--grad-primary); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+  transition: var(--transition-bounce); flex-shrink: 0;
+}
+.back-to-top:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(124,58,237,0.6); }
