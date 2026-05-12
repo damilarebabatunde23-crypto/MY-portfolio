@@ -5,7 +5,7 @@ from .models import Profile, Skill, Project, Service, Experience, Testimonial, R
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ['name', 'title', 'location', 'email']
-
+#profile
 
 @admin.register(Skill)
 class SkillAdmin(admin.ModelAdmin):
