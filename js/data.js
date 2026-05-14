@@ -8,7 +8,7 @@
 //   4. Re-renders every section with your actual data
 // ================================================
 
-const API_BASE = 'http://127.0.0.1:8000/api';
+const API_BASE = 'https://my-backend-mz1s.onrender.com/api';
 
 // ── STATIC DATA (shown instantly, replaced by API data) ──────────────
 const DATA = {
@@ -174,11 +174,31 @@ function rerenderSkills() {
   const grid = document.querySelector('.skills-grid');
   if (grid) {
     grid.innerHTML = '';
+    
+    const iconMap = {
+      'Flutter': 'devicon-flutter-plain colored',
+      'Django': 'devicon-django-plain colored',
+      'Python': 'devicon-python-plain colored',
+      'JavaScript': 'devicon-javascript-plain colored',
+      'React': 'devicon-react-original colored',
+      'Firebase': 'devicon-firebase-plain colored',
+      'REST APIs': 'fas fa-network-wired',
+      'PostgreSQL': 'devicon-postgresql-plain colored',
+      'Git/GitHub': 'fab fa-github',
+      'UI/UX Design': 'fas fa-palette',
+      'Docker': 'devicon-docker-plain colored',
+      'TypeScript': 'devicon-typescript-plain colored'
+    };
+
     DATA.skills.forEach((s, i) => {
       const card = document.createElement('div');
       card.className = 'skill-card reveal-scale revealed';
       card.style.transitionDelay = (i * 0.05) + 's';
-      card.innerHTML = `<div class="skill-icon">${s.icon}</div><div class="skill-name">${s.name}</div>`;
+      
+      const iconClass = iconMap[s.name];
+      const displayIcon = iconClass ? `<i class="${iconClass}"></i>` : s.icon;
+      
+      card.innerHTML = `<div class="skill-icon">${displayIcon}</div><div class="skill-name">${s.name}</div>`;
       grid.appendChild(card);
     });
   }
