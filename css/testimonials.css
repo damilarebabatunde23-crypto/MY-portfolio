@@ -1,0 +1,59 @@
+/* TESTIMONIALS */
+.testimonials { background: var(--bg-secondary); }
+.testimonial-slider { position: relative; overflow: hidden; }
+.testimonial-track { display: flex; transition: transform 0.5s cubic-bezier(0.4,0,0.2,1); }
+.testimonial-card {
+  min-width: 100%; padding: 8px 40px;
+}
+.testimonial-inner {
+  max-width: 720px; margin: 0 auto;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-xl); padding: 48px; text-align: center;
+  position: relative;
+}
+.testimonial-inner::before {
+  content: '\201C'; position: absolute; top: 24px; left: 40px;
+  font-size: 6rem; color: var(--primary); opacity: 0.2;
+  font-family: Georgia, serif; line-height: 1;
+}
+.testimonial-avatar {
+  width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 16px;
+  background: var(--grad-primary); display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; color: rgba(255,255,255,0.9); border: 3px solid var(--border);
+}
+.testimonial-text {
+  font-size: 1.05rem; line-height: 1.8; color: var(--text-secondary);
+  margin-bottom: 24px; font-style: italic;
+}
+.testimonial-name { font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.testimonial-company { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; }
+.stars { color: var(--accent); font-size: 1rem; letter-spacing: 2px; }
+.testimonial-controls { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 32px; }
+.testimonial-btn {
+  width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary);
+  font-size: 1rem; transition: var(--transition-bounce);
+}
+.testimonial-btn:hover { border-color: var(--border-hover); color: var(--primary-light); transform: scale(1.1); }
+.testimonial-dots { display: flex; gap: 8px; }
+.dot { width: 8px; height: 8px; border-radius: 4px; background: var(--border); transition: all 0.3s ease; }
+.dot.active { background: var(--primary-light); width: 24px; }
+
+/* RESUME */
+.resume { background: var(--bg-primary); }
+.resume-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+.resume-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 28px; transition: var(--transition-bounce);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.resume-card:hover { border-color: var(--border-hover); transform: translateY(-6px); box-shadow: var(--glow-sm); }
+.resume-card-icon {
+  width: 52px; height: 52px; border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+  background: var(--grad-card); border: 1px solid var(--border);
+}
+.resume-card-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+.resume-card-subtitle { font-size: 0.85rem; color: var(--text-muted); }
+.resume-card-actions { display: flex; gap: 10px; margin-top: 8px; }
+.resume-card-actions .btn { font-size: 0.8rem; padding: 8px 14px; }
