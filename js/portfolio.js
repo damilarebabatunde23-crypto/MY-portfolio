@@ -44,7 +44,7 @@
     });
     // bind modal buttons
     document.querySelectorAll('.open-modal-btn').forEach(btn => {
-      btn.addEventListener('click', () => openModal(parseInt(btn.dataset.id)));
+      btn.addEventListener('click', () => openModal(btn.dataset.id));
     });
   }
 
@@ -65,7 +65,7 @@
 
   // Modal
   function openModal(id) {
-    const p = DATA.projects.find(x => x.id === id);
+    const p = DATA.projects.find(x => String(x.id) === String(id));
     if (!p) return;
     modalContent.innerHTML = `
       <div class="modal-proj-header">

@@ -1,18 +1,29 @@
 // ================================================
-// DATA.JS – Portfolio data + Django API connector
+// DATA.JS – Portfolio data + Sanity.io CMS connector
 // ================================================
 // HOW IT WORKS:
 //   1. Page loads with static DATA (so nothing is blank)
-//   2. After page is ready, fetches your Django API
-//   3. Overwrites DATA with real content from the DB
-//   4. Re-renders every section with your actual data
+//   2. If Sanity is configured, fetches content via SanityClient (GROQ API)
+//   3. Updates DATA with live content from Sanity Content Lake
+//   4. Re-renders every section with your actual published data
 // ================================================
 
-const API_BASE = 'https://my-backend-mz1s.onrender.com/api';
 
 // ── STATIC DATA (shown instantly, replaced by API data) ──────────────
 const DATA = {
-  profile: null,  // filled from API
+  profile: {
+    name: 'Bamigbola Abdulmalik Opeyemi',
+    title: 'Full Stack & Mobile Developer',
+    description: 'Crafting exceptional digital experiences through elegant code and thoughtful design. Specializing in Flutter, React, and modern cloud technologies.',
+    location: 'Lagos, Nigeria',
+    email: 'alaoopeyemi740@gmail.com',
+    whatsapp: '+2348121307658',
+    github: 'https://github.com/damilarebabatunde23-crypto',
+    linkedin: 'https://www.linkedin.com/in/damilare-babatunde-654345373?utm_source=share_via&utm_content=profile&utm_medium=member_android',
+    twitter: 'https://x.com/Alaoopeyem39075',
+    dribbble: 'https://dribbble.com/damilare-babatunde',
+    instagram: 'https://instagram.com',
+  },
   skills: [
     { name: 'Flutter', icon: '🐦', color: '#54C5F8' },
     { name: 'Django', icon: '🎸', color: '#092E20' },
@@ -260,7 +271,7 @@ function rerenderProjects() {
   const modalContent = document.getElementById('modal-content');
   document.querySelectorAll('.open-modal-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const p = DATA.projects.find(x => x.id === parseInt(btn.dataset.id));
+      const p = DATA.projects.find(x => String(x.id) === String(btn.dataset.id));
       if (!p || !modalContent) return;
       modalContent.innerHTML = `
         <div class="modal-proj-header">
@@ -317,7 +328,7 @@ function rerenderResume() {
       <div class="resume-card-actions">
         ${doc.file && doc.preview ? `<a href="${doc.file}" target="_blank" class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i> Preview</a>` : ''}
         ${doc.file && doc.download ? `<a href="${doc.file}" download class="btn btn-primary btn-sm"><i class="fas fa-download"></i> Download</a>` : ''}
-        ${!doc.file ? `<span style="font-size:0.8rem;opacity:0.5;">Upload via Django Admin</span>` : ''}
+        ${!doc.file ? `<span style="font-size:0.8rem;opacity:0.5;">Upload via Sanity Studio</span>` : ''}
       </div>`;
     grid.appendChild(card);
   });
@@ -335,7 +346,7 @@ function rerenderTestimonials() {
     slide.className = 'testimonial-card';
     slide.innerHTML = `
       <div class="testimonial-inner glass">
-        <div class="testimonial-avatar">${t.emoji}</div>
+        ${t.avatar ? `<img src="${t.avatar}" class="testimonial-avatar-img" alt="${t.name}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;margin-bottom:12px;" />` : `<div class="testimonial-avatar">${t.emoji || '👤'}</div>`}
         <div class="testimonial-text">"${t.text}"</div>
         <div class="testimonial-name">${t.name}</div>
         <div class="testimonial-company">${t.company}</div>
@@ -407,18 +418,18 @@ function rerenderMobileApps() {
   });
 }
 
-// ── MAP API SHAPES ───────────────────────────────────────────────────
-function mapProject(p) {
+// ── MAP SANITY DOCUMENT SHAPES ───────────────────────────────────────
+function mapProject(p, index) {
   return {
-    id: p.id,
-    filter: p.filter_tag || 'web',
+    id: p._id || p.id || (index !== undefined ? index + 1 : 1),
+    filter: p.filterTag || p.filter_tag || 'web',
     icon: p.icon || '💻',
     color: p.color || '#7c3aed',
     image: p.image || null,
-    category: p.category,
-    title: p.title,
-    desc: p.description,
-    fullDesc: p.full_description,
+    category: p.category || 'Project',
+    title: p.title || 'Untitled Project',
+    desc: p.description || '',
+    fullDesc: p.fullDescription || p.full_description || p.description || '',
     tech: Array.isArray(p.tech) ? p.tech : [],
     github: p.github || null,
     demo: p.demo || null,
@@ -426,89 +437,199 @@ function mapProject(p) {
   };
 }
 
-// ── FETCH FROM DJANGO AND REFRESH ───────────────────────────────────
-async function connectDjango() {
-  try {
-    const [profileRes, skillsRes, projectsRes, servicesRes, expRes, testiRes, resumeRes] =
-      await Promise.all([
-        fetch(`${API_BASE}/profiles/`),
-        fetch(`${API_BASE}/skills/`),
-        fetch(`${API_BASE}/projects/`),
-        fetch(`${API_BASE}/services/`),
-        fetch(`${API_BASE}/experiences/`),
-        fetch(`${API_BASE}/testimonials/`),
-        fetch(`${API_BASE}/resumes/`),
-      ]);
+// ── FETCH FROM SANITY CMS AND REFRESH ────────────────────────────────
+async function connectSanity() {
+  if (typeof SanityClient === 'undefined' || !SanityClient.isConfigured()) {
+    console.info(
+      '%c[Sanity.io CMS]%c Not configured yet. Displaying default portfolio content.\nTo connect your live Sanity content, set your projectId in js/sanity-config.js (see SANITY_SETUP.md).',
+      'color: #f03e2f; font-weight: bold;',
+      'color: inherit;'
+    );
+    return;
+  }
 
-    const [profiles, skills, projects, services, experiences, testimonials, resumes] =
-      await Promise.all([
-        profileRes.json(), skillsRes.json(), projectsRes.json(),
-        servicesRes.json(), expRes.json(), testiRes.json(), resumeRes.json(),
-      ]);
+  const GROQ_QUERY = `{
+    "profile": *[_type == "profile"][0]{
+      name,
+      title,
+      description,
+      location,
+      email,
+      whatsapp,
+      github,
+      linkedin,
+      twitter,
+      dribbble,
+      instagram,
+      "profile_picture": profilePicture.asset->url
+    },
+    "skills": *[_type == "skill"] | order(order asc, _createdAt asc){
+      name,
+      icon,
+      color,
+      category
+    },
+    "skillBars": *[_type == "skillBar"] | order(order asc, pct desc){
+      label,
+      pct
+    },
+    "projects": *[_type == "project"] | order(order asc, _createdAt desc){
+      _id,
+      title,
+      category,
+      filterTag,
+      icon,
+      color,
+      description,
+      fullDescription,
+      "image": image.asset->url,
+      tech,
+      github,
+      demo,
+      store
+    },
+    "services": *[_type == "service"] | order(order asc, _createdAt asc){
+      title,
+      icon,
+      description,
+      features
+    },
+    "experiences": *[_type == "experience"] | order(order asc, _createdAt desc){
+      period,
+      role,
+      organization,
+      type,
+      description
+    },
+    "testimonials": *[_type == "testimonial"] | order(order asc, _createdAt asc){
+      name,
+      company,
+      emoji,
+      text,
+      stars,
+      "avatar": avatar.asset->url
+    },
+    "resumes": *[_type == "resumeDoc"] | order(order asc, _createdAt asc){
+      title,
+      subtitle,
+      icon,
+      preview,
+      download,
+      "file": file.asset->url
+    },
+    "mobileApps": *[_type == "mobileApp"] | order(order asc, _createdAt asc){
+      name,
+      tag,
+      emoji,
+      color,
+      desc,
+      features,
+      appStore,
+      playStore
+    }
+  }`;
+
+  try {
+    const result = await SanityClient.fetch(GROQ_QUERY);
+    if (!result) return;
 
     // ── Profile ──
-    if (profiles.length > 0) {
-      DATA.profile = profiles[0];
-      applyProfile(profiles[0]);
+    if (result.profile) {
+      DATA.profile = result.profile;
+      applyProfile(result.profile);
     }
 
-    // ── Skills ──
-    if (skills.length > 0) {
-      DATA.skills = skills;
+    // ── Skills & Skill Bars ──
+    let skillsChanged = false;
+    if (Array.isArray(result.skills) && result.skills.length > 0) {
+      DATA.skills = result.skills;
+      skillsChanged = true;
+    }
+    if (Array.isArray(result.skillBars) && result.skillBars.length > 0) {
+      DATA.skillBars = result.skillBars;
+      skillsChanged = true;
+    }
+    if (skillsChanged) {
       rerenderSkills();
     }
 
     // ── Projects ──
-    if (projects.length > 0) {
-      DATA.projects = projects.map(mapProject);
+    if (Array.isArray(result.projects) && result.projects.length > 0) {
+      DATA.projects = result.projects.map(mapProject);
       rerenderProjects();
     }
 
     // ── Services ──
-    if (services.length > 0) {
-      DATA.services = services.map(s => ({
-        icon: s.icon, title: s.title, desc: s.description,
+    if (Array.isArray(result.services) && result.services.length > 0) {
+      DATA.services = result.services.map(s => ({
+        icon: s.icon,
+        title: s.title,
+        desc: s.description,
         features: Array.isArray(s.features) ? s.features : [],
       }));
       rerenderServices();
     }
 
     // ── Timeline / Experience ──
-    if (experiences.length > 0) {
-      DATA.timeline = experiences.map(e => ({
-        period: e.period, role: e.role, org: e.organization,
-        type: e.type, desc: e.description,
+    if (Array.isArray(result.experiences) && result.experiences.length > 0) {
+      DATA.timeline = result.experiences.map(e => ({
+        period: e.period,
+        role: e.role,
+        org: e.organization,
+        type: e.type,
+        desc: e.description,
       }));
       rerenderTimeline();
     }
 
     // ── Testimonials ──
-    if (testimonials.length > 0) {
-      DATA.testimonials = testimonials.map(t => ({
-        name: t.name, company: t.company,
-        emoji: t.emoji || '👤', text: t.text, stars: t.stars,
+    if (Array.isArray(result.testimonials) && result.testimonials.length > 0) {
+      DATA.testimonials = result.testimonials.map(t => ({
+        name: t.name,
+        company: t.company,
+        emoji: t.emoji || '👤',
+        text: t.text,
+        stars: t.stars || 5,
+        avatar: t.avatar || null,
       }));
       rerenderTestimonials();
     }
 
     // ── Resume / Certificates ──
-    if (resumes.length > 0) {
-      DATA.resumeDocs = resumes.map(r => ({
-        icon: r.icon || '📄', title: r.title, subtitle: r.subtitle,
-        file: r.file || null, preview: true, download: true,
+    if (Array.isArray(result.resumes) && result.resumes.length > 0) {
+      DATA.resumeDocs = result.resumes.map(r => ({
+        icon: r.icon || '📄',
+        title: r.title,
+        subtitle: r.subtitle,
+        file: r.file || null,
+        preview: r.preview !== false,
+        download: r.download !== false,
       }));
       rerenderResume();
     }
 
-    console.log('✅ Connected to Django API — all sections updated with your real data.');
+    // ── Mobile Apps ──
+    if (Array.isArray(result.mobileApps) && result.mobileApps.length > 0) {
+      DATA.mobileApps = result.mobileApps.map(app => ({
+        name: app.name,
+        tag: app.tag,
+        emoji: app.emoji || '📱',
+        color: app.color || 'linear-gradient(135deg, #4f46e5, #4f46e5)',
+        desc: app.desc,
+        features: Array.isArray(app.features) ? app.features : [],
+        appStore: app.appStore || null,
+        playStore: app.playStore || null,
+      }));
+      rerenderMobileApps();
+    }
+
+    console.log('%c✅ Connected to Sanity.io CMS%c — all sections updated with live content.', 'color:#22c55e;font-weight:bold;', 'color:inherit;');
 
   } catch (err) {
-    console.warn('⚠️ Django not reachable. Showing placeholder data.');
-    console.warn('   Start Django with: python manage.py runserver');
+    console.warn('⚠️ Sanity CMS fetch failed:', err.message);
+    console.warn('   Ensure your domain is added to CORS Origins in https://manage.sanity.io');
   }
 }
 
 // ── KICK OFF AFTER PAGE FINISHES LOADING ────────────────────────────
-// The other JS files (skills.js, portfolio.js etc.) run first with static data,
-// then connectDjango() updates everything with real API data.
-window.addEventListener('load', connectDjango);
+window.addEventListener('load', connectSanity);
