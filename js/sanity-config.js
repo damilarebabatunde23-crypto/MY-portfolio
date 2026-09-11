@@ -9,7 +9,7 @@
 // ========================================================
 
 const SANITY_CONFIG = {
-  projectId: 'YOUR_PROJECT_ID', // <-- Put your Sanity project ID here
+  projectId: 'zl364dvu', // <-- Put your Sanity project ID here
   dataset: 'production',        // Default dataset
   apiVersion: '2024-01-01',     // Sanity API version
   useCdn: true,                 // true = fast edge CDN cache (recommended for portfolio)
